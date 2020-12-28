@@ -1,0 +1,50 @@
+#Learning from Codecademy
+https://www.codecademy.com/paths/data-science/tracks/dscp-data-acquisition/modules/dscp-web-scraping/lessons/web-scraping-with-beautiful-soup/exercises/review
+https://discuss.codecademy.com/t/faq-web-scraping-with-beautiful-soup-review/411317/5#
+
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+prefix = "https://content.codecademy.com/courses/beautifulsoup/"
+webpage_response = requests.get('https://content.codecademy.com/courses/beautifulsoup/shellter.html')
+
+webpage = webpage_response.content
+soup = BeautifulSoup(webpage, "html.parser")
+
+turtle_links = soup.find_all("a")
+links = []
+#go through all of the a tags and get the links associated with them"
+for a in turtle_links:
+  links.append(prefix+a["href"])
+    
+#Define turtle_data:
+turtle_data = {}
+
+#follow each link:
+for link in links:
+  webpage = requests.get(link)
+  turtle = BeautifulSoup(webpage.content, "html.parser")
+  turtle_name = turtle.select(".name")[0].get_text()
+  
+  stats = turtle.find("ul")
+  stats_text = stats.get_text("|")
+  turtle_data[turtle_name] = stats_text.split("|")
+  #You can use Pandas’ .from_dict() method to transform a dictionary into a Pandas DataFrame:#
+  turtle_df =  pd.DataFrame.from_dict(turtle_data, orient='index')
+
+  #need to data clean
+
+final_df = turtle_df.drop([0,2,4,6,8,10], axis = 1).reset_index()
+final_df.columns = ['name','age','weight_lbs','sex','breed','source']
+
+final_df['age'] = final_df['age'].str.extract('(\d+)').apply(pd.to_numeric)
+final_df['weight_lbs'] = final_df['weight_lbs'].str.extract('(\d+)').apply(pd.to_numeric)
+
+final_df['sex'] = final_df['sex'].str.split().str[-1]
+final_df['breed'] = final_df['breed'].str.split(':').str[-1]
+final_df['source'] = final_df['source'].str.split(':').str[-1]
+
+print(final_df.head())
+
+  
