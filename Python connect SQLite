@@ -1,0 +1,110 @@
+
+import pandas as pd
+import sqlite3
+
+#test  = pd.read_csv('score.csv')
+conn = sqlite3.connect('test1.db')
+#test.to_sql('test', conn, if_exists='replace', index = False)
+#rows = pd.read_sql('select * from test;', conn)
+
+
+
+x = 0
+
+
+while(x!='end'):
+    
+    
+    print("\n\n***************************************************\n")
+    print("輸入 1:假刪除\n")
+    print("輸入 11:真刪除\n")
+    print("輸入 2:新增\n")
+    print("輸入 3:修改\n")
+    print("輸入 4:查詢全部\n")
+    print("輸入 40:查詢真實全部\n")
+    print("輸入 45:還原狀態\n")
+    print("輸入 5:查詢單一值\n")
+    print("輸入 44:還原初始值\n")
+    print("輸入 end \n")
+    print("***************************************************\n")
+    x =  input( "請輸入您的選擇  :" ) 
+    
+    if( x.isnumeric()):
+        i = int(x) 
+        if ( i < 0 ):
+            print( "索引不能小於１" )
+        elif (i==1):
+            #假刪除
+            id_input =  input( "請輸入名子 :" )
+            cursor = conn.execute("UPDATE test SET tag=0 WHERE name =?", (id_input, ))
+            conn.commit()
+            #cursor = conn.execute( 'select * from test where tag = 0' )
+            rows = pd.read_sql( 'select * from test where tag = 1', conn)
+            print(rows)
+        elif (i==2):
+            #新增
+            id_input =  input( "請輸入名子 :" )
+            score1 =  input( "請輸入score1 :" )
+            score2 =  input( "請輸入score2 :" )
+            score3 =  input( "請輸入score3 :" )
+            score4 =  input( "請輸入score4 :" )
+            tag =  input( "請輸入tag:" )
+            cursor = conn.execute("INSERT INTO test VALUES(?, ?, ?, ?, ?, ?)", (id_input,score1,score2,score3,score4,tag, ))
+            conn.commit()
+            #cursor = conn.execute( 'select * from test where tag = 0' )
+            rows = pd.read_sql( 'select * from test', conn)
+            print(rows)
+        elif (i==3):
+            #修改
+            id_input =  input( "請輸入名子 :" )
+            score1 =  input( "請輸入score1 :" )
+            score2 =  input( "請輸入score2 :" )
+            score3 =  input( "請輸入score3 :" )
+            score4 =  input( "請輸入score4 :" )
+            
+            tag =  input( "請輸入tag:" )
+            cursor = conn.execute("UPDATE test SET score1=?,score2=?,score3=?,score4=? WHERE name =?", (score1,score2,score3,score4,id_input, ))
+            conn.commit()
+            #cursor = conn.execute( 'select * from test where tag = 0' )
+            rows = pd.read_sql( 'select * from test', conn)
+            print(rows)
+        elif (i==4):
+            rows = pd.read_sql( 'select * from test where tag =1', conn)
+            print(rows)
+                  
+        elif (i==40):
+            rows = pd.read_sql( 'select * from test', conn)
+            print(rows)   
+        elif (i==45):
+            #還原狀態
+            id_input =  input( "請輸入名子 :" )
+            cursor = conn.execute("UPDATE test SET tag=1 WHERE name =?", (id_input, ))
+            conn.commit()
+            #cursor = conn.execute( 'select * from test where tag = 0' )
+            rows = pd.read_sql( 'select * from test where tag = 1', conn)
+            print(rows)               
+                  
+        elif (i==5):
+            id_input =  input( "請輸入名子 :" ) 
+            query = '''select * from test  WHERE name = :name'''
+            rows =pd.read_sql(query, con=conn,  params={"name":id_input})
+            print(rows)
+        elif (i==11):
+            #真刪除
+            id_input =  input( "請輸入要刪除的名子 :" )
+            cursor = conn.execute("DELETE FROM test WHERE name =?", (id_input, ))
+            conn.commit()
+            #cursor = conn.execute( 'select * from test where tag = 0' )
+            rows = pd.read_sql( 'select * from test', conn)
+            print(rows)            
+        elif (i==44):
+            #還原
+            test  = pd.read_csv('score.csv')
+            conn = sqlite3.connect('test1.db')
+            test.to_sql('test', conn, if_exists='replace', index = False)
+          
+            
+conn.close()
+    #break
+    ###input("輸入 enter 鍵 繼續")
+    ###os.system("cls")
