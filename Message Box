@@ -1,0 +1,213 @@
+#import csv
+
+import sqlite3
+
+
+#test  = pd.read_csv('score2.csv')
+#conn = sqlite3.connect('test.db')
+#test.to_sql('test', conn, if_exists='replace', index = False)
+#rows = pd.read_sql('select * from test;', conn)
+
+
+
+
+def load_score ( ):
+    #F =  open( 'score2.csv', newline='' )
+    #rows = csv.reader( F, delimiter=',' )
+    conn = sqlite3.connect('test.db')
+    cursor = conn.execute( 'select * from test' )
+    S = [ r for r in cursor ]
+    conn.close()
+    #for ( i, r ) in enumerate( S ):
+     #   for ( j, e ) in enumerate( r ):
+      #      try:
+       #         S[i][j] = int( e )
+        #    except:
+         #       S[i][j] = 0   
+
+    #F.close( )
+ 
+    return S
+
+
+def count_score ( S1, S2, S3 ):
+    return S1+S2+S3
+
+
+def avg_score ( S1, S2, S3 ):
+    return count_score( S1, S2, S3) / part
+
+
+def show_all_Tscore ( N, S ):
+    Tavg = 0
+    Tscore = 0
+    
+    #print( "\n" )    
+    for ( i, e ) in enumerate( S ):
+        avg = avg_score( e[0], e[1], e[2] )
+        score = count_score( e[0], e[1], e[2] ) 
+        Tavg += avg
+        Tscore += score
+        #print ( "%s 的 總分 為 %d, 平均成績：%d" % ( N[i], score, avg ) )
+    #print( "\n" )
+    
+    return  Tscore, Tavg/4
+
+
+def find_max ( N, S ):
+    MAX = 0
+    win = ( 0, "" )
+    
+    for ( i, e ) in enumerate( S ):
+        t = count_score( e[0], e[1], e[2] )
+        if ( t > MAX ):
+            MAX = t
+            win = N[i]
+        
+    return win, MAX
+
+
+def find_min ( N, S ):
+    MIN = 99999
+    lose = ( 0, "" )
+    
+    for ( i, e ) in enumerate( S ):
+        t = count_score( e[0], e[1], e[2] )
+        if ( t < MIN ):
+            MIN = t
+            lose = N[i]
+        
+    return lose, MIN
+
+
+
+
+part = 3
+name = [ "apollo", "vickey", "pig", "elsa" ]
+live = [ True, True, False, True ]
+level = [ "good", "ok", "so..", "bad" ]
+score = load_score( )
+
+    
+
+import tkinter as T
+
+
+W = T.Tk( )
+W.geometry( "600x300" )
+num = T.StringVar()
+mesg = T.StringVar()
+alertmsg =T .StringVar()
+count = 0
+
+
+def My_click():
+    mesg.set(str(num.get()))
+    
+def chkname():
+    if(num.get() == ""):
+        alertmsg.set("不能為空，請輸入姓名")
+    else:
+        alertmsg.set(str(num.get()))
+        
+def test7():
+    x =(num.get())
+    i = int(x) - 1
+    #alertmsg.set(str(live[i]))
+    if ( str(live[i]) == "False" ):
+        alertmsg.set(str(live[i]))
+    else:
+         alertmsg.set("True")
+        
+    
+def test():
+    x =(num.get())
+    if(num.get() == ""):
+        alertmsg.set("不能為空，請輸入學號")
+    elif(x.isnumeric()):
+        i = int(x) - 1
+        if ( i < 0 ):
+           alertmsg.set( "索引不能小於１" )
+        elif ( i > 3 ):
+            alertmsg.set( "索引不能大於４" )
+
+        Yscore = count_score( score[i][0], score[i][1], score[i][2] )
+        alertmsg.set(Yscore)
+    
+        if ( Yscore == 100*part ):
+            alertmsg.set( "%s  總分； %d ，程度： %s" % (name[i], Yscore, level[0]) )
+        elif ( Yscore > 60*part ):
+            alertmsg.set( "%s  總分； %d ，程度： %s" % (name[i], Yscore, level[1]) )
+        elif ( Yscore == 60*part ):    
+            alertmsg.set( "%s  總分； %d ，程度： %s" % (name[i], Yscore, level[2]) )
+        if ( i < 0 ):
+            alertmsg.set( "索引不能小於１" )
+        elif ( i > 3 ):
+            alertmsg.set( "索引不能大於４" )
+        elif ( str(live[i]) == "False"):
+            alertmsg.set( "學生已經退學" )
+
+def test1():
+    Tscore, Tavg = show_all_Tscore ( name, score );
+    alertmsg.set( "全班總分：%d , 總平均：%d" % (Tscore, Tavg) )            
+
+def test2():
+    win, win_score = find_max ( name, score )
+    alertmsg.set( "全班第一名：%s  總分； %d" % (win, win_score) )         
+
+def test3():
+    lose, lose_score = find_min ( name, score )
+    alertmsg.set( "全班最後一名：%s  總分； %d" % (lose, lose_score) ) 
+    
+def createNew2 ():
+    nW = T.Toplevel (W )
+    TT = T.Text( nW )
+    Tscore, Tavg = show_all_Tscore ( name, score )
+    win, win_score = find_max ( name, score )
+    lose, lose_score = find_min ( name, score )
+    TT.insert(T.INSERT,"全班總分：%d , 總平均：%d\n" % (Tscore, Tavg))
+    TT.insert(T.INSERT,"全班第一名：%s  總分； %d\n" % (win, win_score) )
+    TT.insert(T.INSERT,"全班最後一名：%s  總分； %d\n" % (lose, lose_score) ) 
+    TT.pack()
+    
+    TT.config()
+
+L1=T.Label( W, text="輸入： 座號(1~4)" )
+L1.place( x=20, y=20 )
+
+
+
+EUrl = T.Entry( W, textvariable=num )
+EUrl.place( x=150, y=20,width=300 )
+
+B4 = T.Button( W, text="Read Me Tab",command =createNew2)
+B4.place( x=150, y=50 )
+
+
+BDown = T.Button( W, text="查詢: 個人總分與程度",command = test )
+BDown.place( x=250, y=50 )
+
+
+
+B1 = T.Button( W, text="查詢 全班總分與總平均", width=20,command = test1 )
+B1.place( x=20, y=100 )
+
+B2 = T.Button( W, text="查詢 全班第一名", width=20,command = test2 )
+B2.place(x=180, y=100)
+
+B3 = T.Button( W, text="查詢 全班最後一名", width=20,command = test3 )
+B3.grid( row=0, column=2, padx=5, pady=5 )
+B3.place(x=340, y=100)
+
+
+L = T.Label( W,fg = 'red',textvariable=alertmsg)
+L.place(x=150, y=150 )
+
+
+W.mainloop( )
+
+
+
+
+
+
